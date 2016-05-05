@@ -13,8 +13,11 @@ Without Bigrams:
 Training   Test   Accuracy
 
 200        1800   83.78%
+
 500        1500   84.50%
+
 1000       1000   84.41%
+
 1500       500    82.90%
 
 
@@ -23,6 +26,9 @@ With Bigrams:
 Training   Test   Accuracy
 
 200        1800   82.20%
+
 500        1500   83.73%
+
 1000       1000   83.68%
+
 1500       500    81.34%
