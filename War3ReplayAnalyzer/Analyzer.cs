@@ -76,7 +76,9 @@ namespace War3ReplayAnalyzer
 			foreach (ChatInfo ci in replay.Chats) {
 				if (teamPositive.ContainsKey (ci.From.TeamNo)) {
 					//Console.WriteLine (ci.Message);
-					foreach (string s in ci.Message.Split(mDelimiters,1000)) {
+					string[] strs = ci.Message.Split(mDelimiters,StringSplitOptions.RemoveEmptyEntries);
+					for (int i = 0;i<strs.Length;i++) {
+						string s = strs [i];
 						if (!wordsFinished.ContainsKey (s)) {
 							int pos = 0;
 							int neg = 0;
@@ -89,14 +91,37 @@ namespace War3ReplayAnalyzer
 							if (pos < 0 || neg < 0) {
 								Console.WriteLine ("ERROR");
 							}
-							//teamPositive [ci.From.TeamNo] *= (pos + 1) / (double)(2 * mPositiveTotal);
-							//teamNegative [ci.From.TeamNo] *= (neg + 1) / (double)(2 * mNegativeTotal);
 							teamPositive[ci.From.TeamNo] += Math.Log10(1 + pos/(double)mPositiveTotal);
 							teamNegative[ci.From.TeamNo] += Math.Log10(1 + neg/(double)mNegativeTotal);
 							wordsFinished.Add (s, true);
 							//Console.WriteLine ("\tprob pos: " + ci.From.TeamNo + ", " + s + ", " + pos + ", " + teamPositive [ci.From.TeamNo]);
 							//Console.WriteLine ("\tprob neg: " + ci.From.TeamNo + ", " + s + ", " + neg + ", " + teamNegative [ci.From.TeamNo]);
 						}
+
+						#if USE_BIGRAMS
+						if(i>0)
+						{
+							s = strs[i-1]+" "+strs[i];
+							if (!wordsFinished.ContainsKey (s)) {
+								int pos = 0;
+								int neg = 0;
+								if (mPositiveCount.ContainsKey (s)) {
+									pos = mPositiveCount [s];
+								}
+								if (mNegativeCount.ContainsKey (s)) {
+									neg = mNegativeCount [s];
+								}
+								if (pos < 0 || neg < 0) {
+									Console.WriteLine ("ERROR");
+								}
+								teamPositive[ci.From.TeamNo] += Math.Log10(1 + pos/(double)mPositiveTotal);
+								teamNegative[ci.From.TeamNo] += Math.Log10(1 + neg/(double)mNegativeTotal);
+								wordsFinished.Add (s, true);
+								//Console.WriteLine ("\tprob pos: " + ci.From.TeamNo + ", " + s + ", " + pos + ", " + teamPositive [ci.From.TeamNo]);
+								//Console.WriteLine ("\tprob neg: " + ci.From.TeamNo + ", " + s + ", " + neg + ", " + teamNegative [ci.From.TeamNo]);
+							}
+						}
+						#endif
 					}
 				}
 			}
@@ -198,7 +223,9 @@ namespace War3ReplayAnalyzer
 				//Console.WriteLine (ci.From.Id+": "+ci.Message);
 				if (ci.From.TeamNo == winnerteam) {
 					//winner team
-					foreach (string s in ci.Message.Split(mDelimiters,1000)) {
+					string[] strs = ci.Message.Split(mDelimiters,StringSplitOptions.RemoveEmptyEntries);
+					for (int i = 0;i<strs.Length;i++) {
+						string s = strs [i];
 						if (mPositiveCount.ContainsKey (s)) {
 							mPositiveCount [s]++;
 						} else {
@@ -206,18 +233,48 @@ namespace War3ReplayAnalyzer
 						}
 						mPositiveTotal++;
 						//Console.WriteLine ("\tadded positive: " + s);
+
+						#if USE_BIGRAMS
+						if(i>0)
+						{
+							s = strs[i-1]+" "+strs[i];
+							if (mPositiveCount.ContainsKey (s)) {
+								mPositiveCount [s]++;
+							} else {
+								mPositiveCount.Add (s, 1);
+							}
+							mPositiveTotal++;
+							//Console.WriteLine("added bigram "+s);
+						}
+						#endif
 					}
 					
 				} else {
 					//loser team
-					foreach (string s in ci.Message.Split(mDelimiters,1000)) {
+					string[] strs = ci.Message.Split(mDelimiters,StringSplitOptions.RemoveEmptyEntries);
+					for (int i = 0;i<strs.Length;i++) {
+						string s = strs [i];
 						if (mNegativeCount.ContainsKey (s)) {
 							mNegativeCount [s]++;
 						} else {
 							mNegativeCount.Add (s, 1);
 						}
 						mNegativeTotal++;
-						//Console.WriteLine ("\tadded negative: " + s);
+						//Console.WriteLine ("\tadded positive: " + s);
+
+						#if USE_BIGRAMS
+						if(i>0)
+						{
+							s = strs[i-1]+" "+strs[i];
+							if (mNegativeCount.ContainsKey (s)) {
+								mNegativeCount [s]++;
+							} else {
+								mNegativeCount.Add (s, 1);
+							}
+							mNegativeTotal++;
+							//Console.WriteLine("added bigram "+s);
+						}
+						#endif
 					}
 				}
 			}

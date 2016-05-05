@@ -9,16 +9,24 @@ namespace War3ReplayAnalyzer
 		static void Main(String[] args)
 		{
 			Analyzer analyzer = new Analyzer ();
-			int learnCount = 20;
-			int testCount = 80;
+			int learnCount = 500;
+			int testCount = 500;
 			for (int i = 0; i < learnCount; i++) {
-				Console.WriteLine ("Added replay : " + (i+1));
-				analyzer.AddReplay (@"data\Replays\Replate - "+(i+1)+".w3g");
+				string s = (i + 1).ToString();
+				for (int x = s.Length; x < 3; x++) {
+					s = '0' + s;
+				}
+				Console.WriteLine ("Added replay : " + s);
+				analyzer.AddReplay (@"data\Replays\Replays - "+s+".w3g");
 			}
 			for(int i = learnCount+1;i<learnCount+testCount;i++)
 			{
-				Console.WriteLine ("Classifying: " + (i+1));
-				analyzer.Classify (@"data\Replays\Replate - "+(i+1)+".w3g");
+				string s = (i + 1).ToString();
+				for (int x = s.Length; x < 3; x++) {
+					s = '0' + s;
+				}
+				Console.WriteLine ("Classifying: " + s);
+				analyzer.Classify (@"data\Replays\Replays - "+s+".w3g");
 			}
 
 			Console.WriteLine ("Accuracy: " + analyzer.GetAccuracy ());
